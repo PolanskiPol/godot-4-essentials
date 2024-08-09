@@ -1,3 +1,4 @@
+@icon("isave_meta.svg")
 class_name SaveMeta
 extends Resource
 

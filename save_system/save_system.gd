@@ -25,7 +25,7 @@ func save_game(slot : int) -> void:
 		push_error("Slot [" + str(slot) + "] out of bounds.")
 		return
 	ResourceSaver.save(save_file, path)
-	save_meta.save_metas["save_" + str(slot)] = save_file.meta
+	save_meta.save_metas["save_" + str(slot)] = save_file.get_meta_info()
 	ResourceSaver.save(save_meta, _get_path() + "save_metas.tres")
 	
 func load_game(slot : int) -> void:
