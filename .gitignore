@@ -2,7 +2,7 @@
 .godot/
 icon.svg
 icon.svg.import
-project.godot
 testing
 testing/
 testing.*
+*.import
