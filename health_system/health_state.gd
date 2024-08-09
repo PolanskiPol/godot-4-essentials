@@ -1,3 +1,4 @@
+@icon("ihealth_state.svg")
 class_name HealthState
 ## Base class for all HealthStates. A HealthState modifies the behaviour of [Health].
 extends Resource
@@ -28,11 +29,11 @@ func link_health(health : Health) -> void:
 	_health = health
 
 ## Virtual function. Determines if a HealthState can be instanced multiple times in the same [Health].
-## Overwrite to set multiple HealthStates inside the same [Health].
+## Overwrite to set if this HealthState can be instanced more than once inside the same [Health].
 func allows_multiple() -> bool:
 	return false
 
 ## Virtual function. Determines the name of the HealthState for search purposes.
 ## Overwrite to set the name of the HealthState when instanced inside [Health].
 static func get_state_name() -> String:
-	return "health_state"
+	return "HealthState"

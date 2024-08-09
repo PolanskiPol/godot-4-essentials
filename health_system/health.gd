@@ -1,3 +1,4 @@
+@icon("ihealth.svg")
 class_name Health
 ## Health class to add health functionality to any node.
 extends Node
@@ -19,9 +20,9 @@ signal healed(amount : int)
 @onready var prevent_heal_signals : bool = false
 ## When true, disable emission of damage signals, useful when making a [HealthState]
 @onready var prevent_damage_signals : bool = false
-## When true, disable emission of healing signals, useful when making a [HealthState]
+## When true, disable healing, useful when making a [HealthState]
 @onready var prevent_heal : bool = false
-## When true, disable emission of damage signals, useful when making a [HealthState]
+## When true, disable damage, useful when making a [HealthState]
 @onready var prevent_damage : bool = false
 
 @export var max_health : int = 100 : 
