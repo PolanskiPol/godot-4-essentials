@@ -34,4 +34,36 @@ Check the Health node properties and functions, many of them may be of use to ma
 
 ### Save System
 #### Simple system to manage save and configuration files
-**TODO:** Add tutorial
+##### Creating a custom SaveFile/SettingsFile for your game
+The SaveSystem comes with a default SaveFile class that can be extended to make your game's custom save file.
+1. Create a new script
+2. In 'Inherits', select SaveFile
+3. Name your script as the following: [my_save_file]_save_file.gd, where [my_save_file] is the name of your SaveFile
+4. Override get_meta_info() to return a custom Dictionary with your own metadata, such as the file's name, creation date or version
+5. Add properties to the SaveFile as such as the following: @export var save_prop : int, a SaveFile is a Godot Resource, and Godot Resources only read @export properties
+
+All the previous steps are the same for your SettingsFiles, but instead of saving data from the game, you must save configuration data.
+
+##### Configuring the SaveSystem
+This SaveSystem comes with some configuration and prerequisites that must be configured beforehand.
+The SaveSystem comes with a script named save_system.gd (how convenient) to store your SaveFiles and SettingFiles.
+1. Add save_system.gd as a singleton (autoload)
+2. By default, the property debug is set as true, saving data to 'res://', change this to false in production to save to 'user://'
+3. By default, the SaveSystem comes with 3 slots to save a game, configure the property slots to your linkng
+4. Change the type of the property save_file to your custom SaveFile class
+5. Change the type of the property settings_file to your custom SettingsFile class
+
+##### Saving a game
+Now that the SaveSystem is already set up, you can save from any scene in your game.
+1. Call the function save_game(slot : int) from your SaveSystem singleton, this will save the game into the desired slot
+2. The saved information is that of the property save_file, you must modify the properties of save_file from outer scenes
+
+##### Loading a game
+Now that the SaveSystem is already set up, you can save from any scene in your game.
+1. Call the function load_game(slot : int) from your SaveSystem singleton, this will load the game from the desired slot
+2. The loaded information stored into the property save_file to be modified anywhere
+
+##### Beware
+This SaveSystem does not provide safety for SaveFile rewrites or any security feature. These features must be handled by yourself.
+
+This is a consideration for future releases of this Godot package, but as of now, be sure to double check your saving and loading logic.
