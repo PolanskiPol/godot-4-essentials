@@ -35,7 +35,3 @@ Check the Health node properties and functions, many of them may be of use to ma
 ### Save System
 #### Simple system to manage save and configuration files
 **TODO:** Add tutorial
-
-### Pawn-Controller System
-#### System to create Pawn-Controller dynamics similar to Unreal Engine, specially useful for online games
-**TODO:** Add tutorial
