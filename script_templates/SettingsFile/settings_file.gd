@@ -6,13 +6,5 @@
 class_name _CLASS_
 extends SettingsFile
 
-# Virtual function. Defines the save's metadata to be read (for example) on a 'Select file to load' screen.
-# Overwrite to set custom metadata.
-func get_meta_info() -> Dictionary:
-	return {
-		"name": "meta_name",
-		"modify_date": "0000-00-00 00:00",
-		"version": 1,
-		# example: "example"
-		# ...
-	}
+# SettingsFile variables must be @export as SettingsFile is a Resource
+# @export var master_db : float = 0.3
