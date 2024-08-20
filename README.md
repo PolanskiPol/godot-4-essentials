@@ -1,7 +1,11 @@
 # Godot 4.x Essentials
-## Collection of Nodes, Classes and Systems to save time when developing games
+##### Made by Polanski
 
-### Health System
+This repository is a collection of classes, custom nodes, systems and utils developed for Godot 4.x.
+
+All the included essentials have been developed following the composition principle, minimizing inheritance to the bare minimum. As such, you should consider using the given tools in the same way.
+
+## Health System
 #### Simple system to create and manage complex health systems
 ##### [Node] Health
 Health is a node that can be inserted into any scene. Its base stats can be changed from the editor, and it has functions to handle damage & healing done.
@@ -32,7 +36,7 @@ Custom HealthStates can be made by extending the class HealthState.
 
 Check the Health node properties and functions, many of them may be of use to make your own states.
 
-### Save System
+## Save System
 #### Simple system to manage save and configuration files
 ##### Creating a custom SaveFile/SettingsFile for your game
 The SaveSystem comes with a default SaveFile class that can be extended to make your game's custom save file.
