@@ -6,6 +6,11 @@
 class_name _CLASS_
 extends HealthState
 
+# Godot virtual function.
+# Overwrite to add custom behaviour.
+func _init() -> void:
+	pass
+
 # Virtual function. Called when the HealthState enters [Health].
 # Overwrite to add custom behaviour.
 func enter() -> void:
@@ -28,5 +33,10 @@ func allows_multiple() -> bool:
 
 # Virtual function. Determines the name of the HealthState for search purposes.
 # Overwrite to set the name of the HealthState when instanced inside [Health].
-static func get_state_name() -> String:
+func get_state_name() -> String:
+	return "_CLASS_"
+
+# Virtual function. Determines the name of the HealthState for search purposes.
+# Overwrite to set the name of the HealthState when instanced inside [Health].
+static func get_state_static_name() -> String:
 	return "_CLASS_"
