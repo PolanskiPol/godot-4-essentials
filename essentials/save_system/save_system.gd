@@ -3,7 +3,7 @@ extends Node
 @onready var debug : bool = true
 @onready var slots : int = 3
 # Change SaveFile for your custom save file resource
-@onready var save_file : TestSaveFile = TestSaveFile.new()
+@onready var save_file : SaveFile = SaveFile.new()
 # Change SettingsFile for your custom settings file resource
 @onready var settings_file : SettingsFile = SettingsFile.new()
 # Change SaveMeta for your custom save_meta file resource
