@@ -26,6 +26,7 @@ func erase_self() -> void:
 	exit()
 	
 func link_health(health : Health) -> void:
+	if(_health != null): return
 	_health = health
 
 ## Virtual function. Determines if a HealthState can be instanced multiple times in the same [Health].
@@ -35,5 +36,8 @@ func allows_multiple() -> bool:
 
 ## Virtual function. Determines the name of the HealthState for search purposes.
 ## Overwrite to set the name of the HealthState when instanced inside [Health].
-static func get_state_name() -> String:
+func get_state_name() -> String:
+	return "HealthState"
+	
+static func get_state_static_name() -> String:
 	return "HealthState"

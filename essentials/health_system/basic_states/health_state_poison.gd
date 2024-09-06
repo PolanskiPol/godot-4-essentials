@@ -27,5 +27,8 @@ func process(delta : float) -> void:
 func allows_multiple() -> bool:
 	return true
 
-static func get_state_name() -> String:
-	return "health_state_poison"
+func get_state_name() -> String:
+	return "HealthStatePoison"
+	
+static func get_state_static_name() -> String:
+	return "HealthStatePoison"

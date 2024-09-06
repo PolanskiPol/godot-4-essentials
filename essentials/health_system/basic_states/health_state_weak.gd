@@ -29,5 +29,8 @@ func _init(duration : float, infinite : bool = false) -> void:
 	_duration = duration
 	_infinite = infinite
 
-static func get_state_name() -> String:
-	return "health_state_weak"
+func get_state_name() -> String:
+	return "HealthStateWeak"
+	
+static func get_state_static_name() -> String:
+	return "HealthStateWeak"
