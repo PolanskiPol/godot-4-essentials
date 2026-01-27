@@ -1,13 +1,13 @@
 class_name InputBuffer
-extends Resource
+extends RefCounted
 
-@export var frame : int
-@export var input : String
-@export var action : Callable
-@export var condition : Callable
+var frame : int
+var input : String
+var action : Callable
+var condition : Callable
 
-func _init(frame : int, input : String, action : Callable, condition : Callable) -> void:
-	self.frame = frame
+func _init(input : String, action : Callable, condition : Callable) -> void:
+	self.frame = Engine.get_frames_drawn()
 	self.input = input
 	self.action = action
 	self.condition = condition

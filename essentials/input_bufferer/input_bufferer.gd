@@ -12,9 +12,10 @@ var _input_buffers : Dictionary
 ## If the input's [param condition] is met, the [param action] is called.
 ## [param condition] must be a Callable that returns a boolean.
 func buffer(input : String, action : Callable, condition : Callable) -> void:
-	_input_buffers[input] = InputBuffer.new(Engine.get_process_frames(), input, action, condition)
+	_input_buffers[input] = InputBuffer.new(input, action, condition)
 
-func _process(delta: float) -> void:
+
+func _process(_delta: float) -> void:
 	for key in _input_buffers.keys():
 		var input_buffer : InputBuffer = _input_buffers[key]
 		if(input_buffer.frame + frame_buffer_limit < Engine.get_process_frames()):
