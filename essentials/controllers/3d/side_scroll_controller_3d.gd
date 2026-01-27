@@ -4,13 +4,16 @@ extends AbstractController3D
 signal look_direction_changed(direction : Direction)
 
 enum Direction {
+	NONE,
 	LEFT,
 	RIGHT
 }
 
 @onready var speed : float = movement_config.speed
-@onready var look_direction : Direction = Direction.RIGHT :
+@onready var look_direction : Direction = Direction.NONE :
 	set(new_look_direction):
+		if(look_direction == new_look_direction): return
+
 		look_direction = new_look_direction
 		look_direction_changed.emit(new_look_direction)
 
