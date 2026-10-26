@@ -1,80 +1,77 @@
+@icon("isave_file.svg")
 extends Node
 
-@onready var debug : bool = true
-@onready var slots : int = 3
-# Change SaveFile for your custom save file resource
-@onready var save_file : SaveFile = SaveFile.new()
-# Change SettingsFile for your custom settings file resource
-@onready var settings_file : SettingsFile = SettingsFile.new()
-# Change SaveMeta for your custom save_meta file resource
-@onready var save_file_meta : SaveMeta = SaveMeta.new()
-@onready var save_file_metas : SaveMetas = SaveMetas.new()
-@onready var current_slot : int = 0
+## Saves and loads any [Resource] to/from disk as JSON using [GRON].
+## No base class or serialization code is needed: every [code]@export[/code] property
+## of the Resource (and of its sub-resources) is stored automatically.
 
-func _ready() -> void:
-	var path : String = _get_path() + "save_file_metas.tres"
-	if(!ResourceLoader.exists(path)):
-		ResourceSaver.save(save_file_metas, path)
-	save_file_metas = ResourceLoader.load(path)
-		
-func _get_path() -> String:
-	if(debug):
-		return "res://"
+const SAVE_FILE_EXTENSION : String = ".save"
+const CONFIG_FILE_EXTENSION : String = ".conf"
+const UNKNOWN_FILE_EXTENSION : String = ".unk"
+
+enum FileFormat {
+	SAVE,
+	CONFIG
+}
+
+## Directory where the files are stored.
+@onready var save_directory : String = "user://"
+## Not used by any of the methods, but as an external way
+## to control saving flow.
+@onready var save_locked : bool = false
+
+func _get_file_extension(file_format : FileFormat) -> String:
+	if(file_format == FileFormat.SAVE):
+		return SAVE_FILE_EXTENSION
+	elif(file_format == FileFormat.CONFIG):
+		return CONFIG_FILE_EXTENSION
 	else:
-		return "user://"
+		return UNKNOWN_FILE_EXTENSION
 
-## Save the game to the specified slot.
-## The saved values are those of property [save_file].
-func save_game(slot : int = current_slot) -> void:
-	var path : String = _get_path() + "save_" + str(slot) + ".tres"
-	var path_metas : String = _get_path() + "save_file_metas.tres"
-	if(slot - 1 > slots):
-		push_warning("Slot [" + str(slot) + "] out of bounds.")
-		return
-	if(!save_file_metas.save_metas.has(slot)):
-		save_file_metas.save_metas[slot] = save_file_meta
-		save_file_metas.save_metas[slot]["id"] = str(int(Time.get_unix_time_from_system()))
-	ResourceSaver.save(save_file, path)
-	ResourceSaver.save(save_file_metas, path_metas)
-	
-## Load the game to the specified slot.
-## The loaded values are stored in property [save_file].
-func load_game(slot : int) -> void:
-	current_slot = slot
-	var path : String = _get_path() + "save_" + str(slot) + ".tres"
-	var path_metas : String = _get_path() + "save_file_metas.tres"
-	if(!ResourceLoader.exists(path)):
-		push_warning("No save file on slot [" + str(slot) + "].")
-		return
-	if(slot - 1 > slots):
-		push_warning("Slot [" + str(slot) + "] out of bounds.")
-		return
-	save_file = ResourceLoader.load(path)
-	save_file_metas = ResourceLoader.load(path_metas)
-	
-## Save the SaveFile meta to the specified slot.
-## The saved values are those of property [save_file_meta].
-func save_meta(slot : int = current_slot) -> void:
-	var path : String = _get_path() + "save_file_metas.tres"
-	if(slot - 1 > slots):
-		push_warning("Slot [" + str(slot) + "] out of bounds.")
-		return
-	if(!save_file_metas.save_metas.has(slot)):
-		save_file_metas.save_metas[slot] = save_file_meta
-		save_file_metas.save_metas[slot]["id"] = str(int(Time.get_unix_time_from_system()))
-	ResourceSaver.save(save_file_metas, path)
-	
-## Save the settings.
-## The saved values are those of property [settings_file].
-func save_settings() -> void:
-	var path : String = _get_path() + "settings.tres"
-	ResourceSaver.save(save_file, path)
-	
-## Load the settings.
-## The loaded values are stored in property [settings_file].
-func load_settings() -> void:
-	var path : String = _get_path() + "settings.tres"
-	if(!ResourceLoader.exists(path)):
-		push_warning("No settings file found.")
-		return
-	settings_file = ResourceLoader.load(path)
+func _get_file_path(file_name : String, file_format : FileFormat) -> String:
+	return save_directory.path_join(file_name + _get_file_extension(file_format))
+
+## Saves [param resource] into the file [param file_name] with the extension of [param file_format].
+## Returns whether the resource could be saved.
+func save_resource(
+	resource : Resource,
+	file_name : String,
+	file_format : FileFormat = FileFormat.SAVE
+) -> bool:
+	var serialized : String = GRON.serialize(resource)
+	if(serialized == ""):
+		return false
+	var path : String = _get_file_path(file_name, file_format)
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var savefile : FileAccess = FileAccess.open(path, FileAccess.WRITE)
+	if(savefile == null):
+		push_error("Could not open [" + path + "] to save: " + error_string(FileAccess.get_open_error()))
+		return false
+	savefile.store_string(serialized)
+	savefile.close()
+	return true
+
+## Loads the resource stored in the file [param file_name] with the extension of [param file_format].
+## Returns [code]null[/code] if the file does not exist or could not be deserialized.
+func load_resource(
+	file_name : String,
+	file_format : FileFormat = FileFormat.SAVE
+) -> Resource:
+	var path : String = _get_file_path(file_name, file_format)
+	if(!FileAccess.file_exists(path)):
+		return null
+	var savefile_content : String = FileAccess.get_file_as_string(path)
+	if(savefile_content == ""):
+		return null
+	return GRON.deserialize(savefile_content)
+
+## Same as [method load_resource], but returns [param fallback] if the resource could not be loaded.
+func load_resource_not_null(
+	file_name : String,
+	fallback : Resource,
+	file_format : FileFormat = FileFormat.SAVE
+) -> Resource:
+	var loaded_resource : Resource = load_resource(file_name, file_format)
+	if(loaded_resource == null):
+		return fallback
+	return loaded_resource

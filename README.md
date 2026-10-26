@@ -37,37 +37,48 @@ Custom HealthStates can be made by extending the class HealthState.
 Check the Health node properties and functions, many of them may be of use to make your own states.
 
 ## Save System
-#### Simple system to manage save and configuration files
-##### Creating a custom SaveFile/SettingsFile for your game
-The SaveSystem comes with a default SaveFile class that can be extended to make your game's custom save file.
-1. Create a new script
-2. In 'Inherits', select SaveFile
-3. Name your script as the following: [my_save_file]_save_file.gd, where [my_save_file] is the name of your SaveFile
-4. Override get_meta_info() to return a custom Dictionary with your own metadata, such as the file's name, creation date or version
-5. Add properties to the SaveFile as such as the following: @export var save_prop : int, a SaveFile is a Godot Resource, and Godot Resources only read @export properties
-
-All the previous steps are the same for your SettingsFiles, but instead of saving data from the game, you must save configuration data.
+#### Simple system to save and load any Resource to disk
+The SaveSystem stores any Godot Resource as JSON using GRON, so there is no base class to extend and no serialization code to write: every @export property of the Resource (and of its sub-resources) is saved automatically.
 
 ##### Configuring the SaveSystem
-This SaveSystem comes with some configuration and prerequisites that must be configured beforehand.
-The SaveSystem comes with a script named save_system.gd (how convenient) to store your SaveFiles and SettingFiles.
-1. Add save_system.gd as a singleton (autoload)
-2. By default, the property debug is set as true, saving data to 'res://', change this to false in production to save to 'user://'
-3. By default, the SaveSystem comes with 3 slots to save a game, configure the property slots to your linkng
-4. Change the type of the property save_file to your custom SaveFile class
-5. Change the type of the property settings_file to your custom SettingsFile class
+1. Add save_system.gd as a singleton (autoload) named SaveSystem
+2. By default, files are saved to 'user://', change the property save_directory to save them somewhere else
 
-##### Saving a game
-Now that the SaveSystem is already set up, you can save from any scene in your game.
-1. Call the function save_game(slot : int) from your SaveSystem singleton, this will save the game into the desired slot
-2. The saved information is that of the property save_file, you must modify the properties of save_file from outer scenes
+##### Creating a resource to save
+Any Resource works, just make sure the values you want to save are @export properties.
+```gdscript
+class_name PlayerData
+extends Resource
 
-##### Loading a game
-Now that the SaveSystem is already set up, you can save from any scene in your game.
-1. Call the function load_game(slot : int) from your SaveSystem singleton, this will load the game from the desired slot
-2. The loaded information stored into the property save_file to be modified anywhere
+@export var coins : int = 0
+@export var unlocked_items : Array[String] = []
+@export var skin_color : Color = Color.WHITE
+```
+
+##### Saving a resource
+Call save_resource(resource, file_name, file_format) from your SaveSystem singleton.
+The file_format can be FileFormat.SAVE (.save, default) or FileFormat.CONFIG (.conf).
+```gdscript
+SaveSystem.save_resource(player_data, "player_data")
+SaveSystem.save_resource(config, "game", SaveSystem.FileFormat.CONFIG)
+```
+
+##### Loading a resource
+Call load_resource(file_name, file_format) to get the saved resource back, or null if there is no file.
+Call load_resource_not_null(file_name, fallback, file_format) to get a fallback resource instead of null.
+```gdscript
+var player_data : PlayerData = SaveSystem.load_resource_not_null("player_data", PlayerData.new())
+```
 
 ##### Beware
-This SaveSystem does not provide safety for SaveFile rewrites or any security feature. These features must be handled by yourself.
+This SaveSystem does not provide safety for save file rewrites or any security feature. These features must be handled by yourself.
+The property save_locked is not used by the SaveSystem, use it to control the saving flow of your game.
 
-This is a consideration for future releases of this Godot package, but as of now, be sure to double check your saving and loading logic.
+## GRON
+#### Universal serializer from any Resource to JSON and back
+GRON is a static class that serializes any Resource to JSON and deserializes it back to an equivalent Resource: nested and shared sub-resources, typed Arrays and Dictionaries and every built-in type are supported without precision loss.
+```gdscript
+var json : String = GRON.serialize(resource)
+var copy : Resource = GRON.deserialize(json)
+```
+Only properties stored by Godot (@export properties) are serialized. Sub-resources saved in their own file under 'res://' are stored as a reference to their path, pass embed_external as true to embed them instead.

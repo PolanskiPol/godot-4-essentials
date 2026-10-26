@@ -20,7 +20,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-SaveSystem="*res://save_system/save_system.gd"
+SaveSystem="*res://essentials/save_system/save_system.gd"
 
 [editor_plugins]
 
