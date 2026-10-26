@@ -22,7 +22,7 @@ func _ready() -> void:
 		))
 		add_child(instance)
 		_pooled.append(instance)
-		
+
 ## Activates the next instance of [class Pooled].
 func activate() -> Pooled:
 	var pooled : Pooled = _pooled[_next_pool]

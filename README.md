@@ -74,6 +74,64 @@ var player_data : PlayerData = SaveSystem.load_resource_not_null("player_data", 
 This SaveSystem does not provide safety for save file rewrites or any security feature. These features must be handled by yourself.
 The property save_locked is not used by the SaveSystem, use it to control the saving flow of your game.
 
+## Threaded Loading
+#### Load resources and change scenes without freezing the game
+##### [Node] ResourceLoaderThreaded
+Loads resources in background threads and caches them once loaded, so they are ready when needed.
+1. Call load_resource(path) to start loading a resource
+2. Listen to the signals resource_loaded(path) and resource_load_failed(path), or check get_status(path) and get_progress(path)
+3. Call get_resource(path) to get the loaded resource
+4. Call release_resource(path) to remove it from the cache once it's not needed anymore
+
+##### Configuring the ThreadedSceneChanger
+1. Add threaded_scene_changer.gd as a singleton (autoload) named ThreadedSceneChanger
+2. Set keep_previous_scene to true if you want to go back to the previous scene with to_previous()
+
+##### Changing scenes
+```gdscript
+# Preload scenes in the background, e.g. while the player is in the menu
+ThreadedSceneChanger.threaded_loader.load_resource("res://scenes/level.tscn")
+# Change to a scene, loading it first if needed
+ThreadedSceneChanger.go_to_scene("res://scenes/level.tscn")
+# Change to a scene that is already instanced
+ThreadedSceneChanger.go_to_node(level_instance)
+```
+
+##### Signals and hooks
+Every scene change goes through these steps, emitting a signal on each one:
+1. scene_change_started(path): the change begins and the scene starts loading
+2. loading_progress(path, progress): emitted every frame while the scene loads or the change is held
+3. scene_changed(path): the new scene is in the tree
+4. scene_change_finished(path): the change is complete
+
+If the scene cannot be loaded, scene_change_failed(path) is emitted instead of steps 3 and 4.
+
+Listeners of scene_change_started and scene_changed can call hold() to make the scene change wait until they call release(). This is how you connect your own functionality to the system, such as transitions, loading screens or online synchronization:
+```gdscript
+func _ready() -> void:
+	# Keep working while the game is paused, as the ThreadedSceneChanger does
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	ThreadedSceneChanger.scene_change_started.connect(_on_scene_change_started)
+	ThreadedSceneChanger.loading_progress.connect(func(_path, progress): progress_bar.value = progress)
+	ThreadedSceneChanger.scene_changed.connect(_on_scene_changed)
+	ThreadedSceneChanger.scene_change_finished.connect(func(_path): animation_player.play_backwards("cover"))
+	ThreadedSceneChanger.scene_change_failed.connect(func(_path): animation_player.play_backwards("cover"))
+
+func _on_scene_change_started(_path) -> void:
+	# Cover the screen before the scene is swapped
+	ThreadedSceneChanger.hold()
+	animation_player.play("cover")
+	await animation_player.animation_finished
+	ThreadedSceneChanger.release()
+
+func _on_scene_changed(_path) -> void:
+	# Wait for every peer to load the scene before uncovering the screen
+	ThreadedSceneChanger.hold()
+	await Network.wait_for_all_peers()
+	ThreadedSceneChanger.release()
+```
+Every hold() must be followed by a release(), or the scene change will wait forever.
+
 ## GRON
 #### Universal serializer from any Resource to JSON and back
 GRON is a static class that serializes any Resource to JSON and deserializes it back to an equivalent Resource: nested and shared sub-resources, typed Arrays and Dictionaries and every built-in type are supported without precision loss.

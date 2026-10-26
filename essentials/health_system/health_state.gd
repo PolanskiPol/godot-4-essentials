@@ -24,7 +24,7 @@ func process(delta : float) -> void:
 func erase_self() -> void:
 	_health.health_states.erase(self)
 	exit()
-	
+
 func link_health(health : Health) -> void:
 	if(_health != null): return
 	_health = health
@@ -38,6 +38,6 @@ func allows_multiple() -> bool:
 ## Overwrite to set the name of the HealthState when instanced inside [Health].
 func get_state_name() -> String:
 	return "HealthState"
-	
+
 static func get_state_static_name() -> String:
 	return "HealthState"
